@@ -1,0 +1,22 @@
+apk反编译说明
+1. 将aapt,apktool,apktool.jar拷贝到/usr/local/bin下(在root权限下才可以，修改属性chmod)。
+2. dex2jar目录下的dex2jar.sh 是把classes.dex反编译成*.class。
+3. jd-linux(Java decompile) 是显示*.class文件。
+
+用法：
+第一步：apktool d [路径]/xxx.apk [指定目录](解压到指定目录，只能反编译xml文件)
+第二步：sh [路径]/dex2jar/dex2jar.sh classes.dex。(当前目录下会生成classes_dex2jar.jar)
+    或 sh [路径]/dex2jar/dex2jar.sh xxx.apk。(会生成xxx_dex2jar.jar)
+第三步: 使用jd-linux下的jd-gui浏览反编译的*_dex2jar.jar包（里面是*.class文件）
+
+1 . 把apk拷到apktool根目录下，执行：./apktool d xxx.apk,会生成xxx目录，里面有res目录（各种资源文件），smali目录（类似src目录，里面文件的语法不一样）及AndroidManifest.xml。
+
+[*.apk->*.jar: sh ./dex2jar/dex2jar.sh xxx.apk,生成xxx_dex2jar.jar通过jd-linux看源码]
+
+2 . 什么apk汉化啊，就到res/values里string.xml里修改字符串，或者拷贝一份values目录改为values-zh-rCN，再去里面修改string.xml里英文字符串改为中文，所谓的汉化就是这么简单。另外，有些图片里不是中文的得去改图片，那得用Photoshop了，图片也不能乱改，格式，图片大小（尺寸）得原来的。
+
+3 . 修改smali文件，这个有些难度。比如有些apk安装了后要积分什么的，比如大于100才可以用的，其实这个值是用SharedPreference存放的，也就是存在xml里，，位置:/data/data/[包名]/shared_prefs的某个xml里，文件不多肯定是可以找到的。另外一种方法就是修改.smali文件也可以达到这目的，软件实现肯定是读取积分那个值给它修改一下就可以了，例如 const/16 v0 100  （其实就是 v0 = 100）这个语法有点像汇编，觉得还是比汇编简单，v0 v1 ...是寄存器，之前会跟变量关联的。具体的还是自己看看smali语法。
+
+4 . 打包生成apk，执行：./apktool b xxx，会在xxx里面生成，一个dist目录，里面就是xxx.apk，但不能安装滴，提示（Failure [INSTALL_PARSE_FAILED_NO_CERTIFICATES]），没有给这个apk签名，
+
+5 . 签名，执行：sh ./dex2jar/d2j-apk-sign.sh ./xxx/dist/xxx.apk 就是给刚才那个apk签名，生成的文件还是xxx.apk在apktool根目录下。这样就大功告成啦。
